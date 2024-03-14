@@ -22,8 +22,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="GameLogic\Board.cs" />
+    <Compile Include="GameLogic\Counter.cs" />
+    <Compile Include="GameLogic\Level.cs" />
+    <Compile Include="GameLogic\Tile.cs" />
+    <Compile Include="Helpers\Input.cs" />
     <Compile Include="Pages\Index.razor.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="States\EndState.cs" />
+    <Compile Include="States\IState.cs" />
+    <Compile Include="States\MenuState.cs" />
+    <Compile Include="States\PlayState.cs" />
+    <Compile Include="States\StateManager.cs" />
     <Compile Include="ZeroFlip64WebGame.cs" />
   </ItemGroup>
 
@@ -36,6 +46,10 @@
 
   <ItemGroup>
     <KniContentReference Include="Content\ZeroFlip64WebContent.mgcb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="data\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\Kni.Content.Builder.targets" />
 </Project>

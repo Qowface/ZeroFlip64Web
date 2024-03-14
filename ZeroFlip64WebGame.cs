@@ -6,64 +6,81 @@ using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using ZeroFlip64Web.GameLogic;
+using ZeroFlip64Web.Helpers;
+using ZeroFlip64Web.States;
 
 namespace ZeroFlip64Web
 {
-    /// <summary>
-    /// This is the main type for your game.
-    /// </summary>
     public class ZeroFlip64WebGame : Game
     {
+        public const int GameWidth = 64;
+        public const int GameHeight = 64;
+        public const int GameScale = 8;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        private RenderTarget2D _nativeRenderTarget;
+        private Rectangle _actualScreenRectangle;
+
+        public static Dictionary<string, Texture2D> Textures;
+        public static Dictionary<string, SoundEffect> Sounds;
+
+        public static Input Input;
+
+        public static StateManager States;
 
         public ZeroFlip64WebGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            _nativeRenderTarget = new RenderTarget2D(GraphicsDevice, GameWidth, GameHeight);
+            _actualScreenRectangle = new Rectangle(x: 0, y: 0, width: GameWidth * GameScale, height: GameHeight * GameScale);
+            graphics.PreferredBackBufferWidth = GameWidth * GameScale;
+            graphics.PreferredBackBufferHeight = GameHeight * GameScale;
+            graphics.ApplyChanges();
 
             base.Initialize();
-
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: Use this.Content to load your game content here
+            Textures = new Dictionary<string, Texture2D>();
+            Textures.Add("0", Content.Load<Texture2D>("0"));
+            Textures.Add("1", Content.Load<Texture2D>("1"));
+            Textures.Add("2", Content.Load<Texture2D>("2"));
+            Textures.Add("3", Content.Load<Texture2D>("3"));
+            Textures.Add("back", Content.Load<Texture2D>("back"));
+            Textures.Add("cursor", Content.Load<Texture2D>("cursor"));
+            Textures.Add("gameover", Content.Load<Texture2D>("gameover"));
+            Textures.Add("nums", Content.Load<Texture2D>("nums"));
+            Textures.Add("restart", Content.Load<Texture2D>("restart"));
+            Textures.Add("start", Content.Load<Texture2D>("start"));
+            Textures.Add("title", Content.Load<Texture2D>("title"));
+            Textures.Add("youwin", Content.Load<Texture2D>("youwin"));
+
+            Sounds = new Dictionary<string, SoundEffect>();
+            Sounds.Add("ding", Content.Load<SoundEffect>("ding"));
+            Sounds.Add("lose", Content.Load<SoundEffect>("lose"));
+            Sounds.Add("win", Content.Load<SoundEffect>("win"));
+
+            Input = new Input();
+
+            States = new StateManager();
+            States.Push(new MenuState());
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             MouseState mouseState = Mouse.GetState();
@@ -80,20 +97,26 @@ namespace ZeroFlip64Web
                 catch (PlatformNotSupportedException) { /* ignore */ }
             }
 
-            // TODO: Add your update logic here
+            Input.Update(gameTime);
+
+            States.Update(gameTime);
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.SetRenderTarget(_nativeRenderTarget);
+            GraphicsDevice.Clear(new Color(27, 38, 50));
+            spriteBatch.Begin();
 
-            // TODO: Add your drawing code here
+            States.Draw(gameTime, spriteBatch);
+
+            spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            spriteBatch.Draw(_nativeRenderTarget, _actualScreenRectangle, Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
